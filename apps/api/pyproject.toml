@@ -1,0 +1,41 @@
+[project]
+name = "open-chat-api"
+version = "0.1.0"
+description = "FastAPI backend for Open Chat"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+  "alembic>=1.18.5,<2",
+  "asyncpg>=0.31.0,<1",
+  "fastapi>=0.139.0,<0.140",
+  "pydantic-settings>=2.14.2,<3",
+  "redis>=8.0.1,<9",
+  "sqlalchemy[asyncio]>=2.0.51,<3",
+  "uvicorn[standard]>=0.51.0,<0.52",
+]
+
+[dependency-groups]
+dev = [
+  "httpx2>=2.5.0,<3",
+  "pytest>=9.1.1,<10",
+  "pytest-asyncio>=1.4.0,<2",
+  "ruff>=0.15.21,<0.16",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+package = false
+
+[tool.pytest.ini_options]
+addopts = "-q"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["ASYNC", "B", "E", "F", "I", "SIM", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]

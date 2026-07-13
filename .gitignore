@@ -1,0 +1,30 @@
+# Codex workspace artifacts
+/outputs/
+/work/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# JavaScript
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+dist/
+*.egg-info/
+
+# IDE and OS
+.DS_Store
+.idea/
+.vscode/

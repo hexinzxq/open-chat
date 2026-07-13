@@ -1,0 +1,29 @@
+{
+  "name": "open-chat",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "build": "pnpm --filter @open-chat/web build",
+    "dev": "concurrently -k -n web,api -c cyan,magenta \"pnpm dev:web\" \"pnpm dev:api\"",
+    "dev:api": "cd apps/api && uv run uvicorn app.main:app --reload --port 8000",
+    "dev:web": "pnpm --filter @open-chat/web dev",
+    "format": "prettier --write . && cd apps/api && uv run ruff format .",
+    "format:check": "prettier --check . && cd apps/api && uv run ruff format --check .",
+    "lint": "pnpm lint:web && pnpm lint:api",
+    "lint:api": "cd apps/api && uv run ruff check .",
+    "lint:web": "pnpm --filter @open-chat/web lint",
+    "test": "pnpm test:api",
+    "test:api": "cd apps/api && uv run pytest",
+    "typecheck": "pnpm --filter @open-chat/web typecheck",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "concurrently": "9.2.1",
+    "prettier": "3.9.5"
+  }
+}
