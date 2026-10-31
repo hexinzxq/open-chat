@@ -1,81 +1,73 @@
 # Open Chat
 
-面向生产环境演进的开源 AI 聊天助手。项目采用 Monorepo，前端为 Next.js App Router，后端为 FastAPI，并以 PostgreSQL 与 Redis 作为持久化和缓存基础设施。
+一个能直接聊天的开源界面：左侧会话、中间消息流、流式输出、Markdown 渲染。前端 Next.js，
+后端可选——默认走 Next 自己的 Route Handler 代理，纯静态托管时自动直连上游。
 
-> 当前进度：阶段 1（可运行工程骨架）。聊天与 AI 能力会在后续阶段按可运行提交逐步加入。
+在线试用：<https://hexinzxq.github.io/open-chat/>
 
-## 技术栈
+## 它长什么样
 
-- Web：Next.js 16、React 19、TypeScript、Tailwind CSS 4、shadcn/ui 组件约定、TanStack Query、Zustand
-- API：FastAPI、Pydantic v2、SQLAlchemy 2、Alembic、PostgreSQL、Redis、uv
-- 工程：pnpm workspace、Docker Compose、GitHub Actions、ESLint、Prettier、Ruff、pytest
+- 三栏：会话列表 / 消息流 / 输入框，键盘可达，深色单色底 + 一个品牌蓝
+- 流式回复，可以中途停止，失败能原地重试
+- 会话和历史存在浏览器（localStorage），换设备不同步，也不上传
+- 接口兼容任何 OpenAI 协议端点：DeepSeek、OpenAI、自建网关都行，改 Base URL 即可
 
-## 本地开发
+## 跑起来（Mac / Windows 通用）
 
-需要 Node.js 24、pnpm 10、Python 3.14、[uv](https://docs.astral.sh/uv/) 和 Docker。
+需要 Node.js 24+ 和 pnpm 10+。
 
 ```bash
-cp .env.example .env
+git clone https://github.com/hexinzxq/open-chat.git
+cd open-chat
 pnpm install
-cd apps/api && uv sync && cd ../..
-docker compose up -d postgres redis
 pnpm dev
 ```
 
-启动后可访问：
+打开 <http://localhost:3000>，点左下角「设置」，填 API Key（Base URL 默认 `https://api.deepseek.com`，
+模型默认 `deepseek-chat`）。Key 只存在你本地浏览器里。
 
-- Web：http://localhost:3000
-- API 文档：http://localhost:8000/docs
-- 存活检查：http://localhost:8000/api/v1/health/live
-- 就绪检查：http://localhost:8000/api/v1/health/ready
+Windows 上用 PowerShell 或 Git Bash 跑同样的命令；没有 pnpm 就先 `npm i -g pnpm@10`。
 
-也可以完全使用容器启动：
+## 两种构建
+
+| 模式 | 命令 | 说明 |
+|---|---|---|
+| 本地开发 | `pnpm dev` | Next dev server，带 `/api/chat` 代理 |
+| 静态导出 | `pnpm build:static` | 产物在 `apps/web/out/`，无服务端，前端直连上游 |
+| 生产（Node） | `pnpm build && pnpm --filter @open-chat/web start` | standalone 服务端渲染 |
+
+静态版没有 `/api/chat`，前端会检测到 404 然后改成浏览器直连；DeepSeek 的接口是允许跨域的，
+换成别家接口时如果被 CORS 挡了，就用带服务端的部署方式。
+
+## 部署
+
+- **GitHub Pages**：仓库自带 `.github/workflows/pages.yml`，推到 main 自动构建静态版并发布到
+  `/open-chat/` 子路径。
+- **Vercel / 自建 Node**：直接连仓库，构建命令 `pnpm --filter @open-chat/web build`；
+  想免去用户填 key，可以在环境变量里配 `DEEPSEEK_API_KEY`，代理会优先用它。
+
+## 可选：完整后端
+
+仓库里还留着阶段一搭好的 `apps/api`（FastAPI + PostgreSQL + Redis），用于后续做多用户、
+持久化会话和 RAG。它不影响上面任何一条启动路径。
 
 ```bash
-cp .env.example .env
-docker compose up --build
+pnpm dev:full                     # 同时起 web 和 api
+docker compose up -d postgres redis
 ```
 
-`.env.example` 中的数据库口令仅供本地开发使用，部署时必须通过密钥管理服务覆盖。
+## 目录
 
-## 常用命令
-
-```bash
-pnpm dev           # 同时启动 Web 与 API
-pnpm lint          # ESLint + Ruff
-pnpm typecheck     # Web TypeScript 检查
-pnpm test          # API 测试
-pnpm build         # Web 生产构建
-pnpm format:check  # Prettier + Ruff 格式检查
+```
+apps/web                 Next.js 前端 + /api/chat 代理
+  app/page.tsx           聊天主界面
+  components/chat/       侧栏、消息、输入框、设置
+  lib/chat/             类型、状态（zustand + persist）、SSE 解析
+  scripts/build-static   静态导出脚本（临时挪走 api 路由）
+apps/api                 FastAPI（可选）
+.github/workflows/pages 静态版自动部署
 ```
 
-数据库迁移：
+## License
 
-```bash
-cd apps/api
-uv run alembic upgrade head
-uv run alembic revision --autogenerate -m "describe change"
-```
-
-## 目录结构
-
-```text
-apps/
-  web/             Next.js App Router 前端
-  api/             FastAPI API、数据库与缓存基础设施
-.github/workflows/ 持续集成
-compose.yaml       本地完整技术栈
-```
-
-## 分阶段路线图
-
-每个阶段保持可安装、可测试、可启动，并单独提交：
-
-1. **工程骨架（当前）**：Monorepo、Web/API、健康检查、PostgreSQL、Redis、容器与 CI。
-2. **会话数据层**：用户与会话模型、消息持久化、Alembic 迁移、历史会话 API。
-3. **统一 AI Provider**：OpenAI、Claude、Gemini、DeepSeek 适配器，模型目录、模型切换与流式聊天。
-4. **文件与多模态**：安全上传、文档解析、对象存储抽象、图片理解。
-5. **搜索与 RAG**：联网搜索、文档切分、向量检索、知识库管理与引用。
-6. **工具与生产加固**：MCP/Agent 扩展点、可观测性、限流、审计、安全和部署基线。
-
-后续阶段不会提前混入当前提交，避免产生无法验证的大爆炸式变更。
+MIT

@@ -7,7 +7,8 @@
     "dev": "next dev",
     "lint": "eslint . --max-warnings=0",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:static": "node scripts/build-static.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "5.101.2",
@@ -17,6 +18,8 @@
     "next": "16.2.10",
     "react": "19.2.7",
     "react-dom": "19.2.7",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "3.6.0",
     "zustand": "5.0.14"
   },

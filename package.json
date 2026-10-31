@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "pnpm --filter @open-chat/web build",
-    "dev": "concurrently -k -n web,api -c cyan,magenta \"pnpm dev:web\" \"pnpm dev:api\"",
+    "dev": "pnpm --filter @open-chat/web dev",
     "dev:api": "cd apps/api && uv run uvicorn app.main:app --reload --port 8000",
     "dev:web": "pnpm --filter @open-chat/web dev",
     "format": "prettier --write . && cd apps/api && uv run ruff format .",
@@ -20,7 +20,9 @@
     "test": "pnpm test:api",
     "test:api": "cd apps/api && uv run pytest",
     "typecheck": "pnpm --filter @open-chat/web typecheck",
-    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "dev:full": "concurrently -k -n web,api -c cyan,magenta \"pnpm dev:web\" \"pnpm dev:api\"",
+    "build:static": "pnpm --filter @open-chat/web build:static"
   },
   "devDependencies": {
     "concurrently": "9.2.1",

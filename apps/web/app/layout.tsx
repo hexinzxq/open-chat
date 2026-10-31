@@ -1,24 +1,22 @@
-import type { Metadata } from "next";
-
-import { Providers } from "@/app/providers";
+import type { Metadata, Viewport } from "next";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Open Chat",
-  description: "A production-grade, provider-neutral AI assistant.",
+  description: "A minimal, provider-neutral chat UI that runs anywhere.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+  themeColor: "#0f1117",
+  width: "device-width",
+  initialScale: 1,
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-CN">
-      <body>
-        <Providers>{children}</Providers>
-      </body>
+    <html lang="zh-CN" className="dark">
+      <body className="bg-background text-foreground antialiased">{children}</body>
     </html>
   );
 }
