@@ -1,10 +1,10 @@
 "use client";
 
-import { Check, Download, X } from "lucide-react";
+import { Check, Download, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { PROVIDERS } from "@/lib/chat/providers";
-import type { Settings, Theme } from "@/lib/chat/types";
+import type { ModelProfile, Settings, Theme } from "@/lib/chat/types";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -12,6 +12,8 @@ type Props = {
   settings: Settings;
   onClose: () => void;
   onSave: (settings: Settings) => void;
+  onSaveProfile: (name: string) => void;
+  onRemoveProfile: (id: string) => void;
 };
 
 const THEMES: { id: Theme; label: string }[] = [
@@ -20,7 +22,14 @@ const THEMES: { id: Theme; label: string }[] = [
   { id: "light", label: "浅色" },
 ];
 
-export function SettingsDialog({ open, settings, onClose, onSave }: Props) {
+export function SettingsDialog({
+  open,
+  settings,
+  onClose,
+  onSave,
+  onSaveProfile,
+  onRemoveProfile,
+}: Props) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -33,11 +42,26 @@ export function SettingsDialog({ open, settings, onClose, onSave }: Props) {
   if (!open) return null;
 
   // 关闭时整块卸载，下次打开重新挂载 → 草稿就是最新设置，不需要 effect 同步
-  return <SettingsForm settings={settings} onClose={onClose} onSave={onSave} />;
+  return (
+    <SettingsForm
+      settings={settings}
+      onClose={onClose}
+      onSave={onSave}
+      onSaveProfile={onSaveProfile}
+      onRemoveProfile={onRemoveProfile}
+    />
+  );
 }
 
-function SettingsForm({ settings, onClose, onSave }: Omit<Props, "open">) {
+function SettingsForm({
+  settings,
+  onClose,
+  onSave,
+  onSaveProfile,
+  onRemoveProfile,
+}: Omit<Props, "open">) {
   const [draft, setDraft] = useState(settings);
+  const [profileName, setProfileName] = useState("");
   const [models, setModels] = useState<string[]>([]);
   const [pulling, setPulling] = useState(false);
   const [pullError, setPullError] = useState<string | null>(null);
@@ -256,6 +280,60 @@ function SettingsForm({ settings, onClose, onSave }: Omit<Props, "open">) {
               placeholder="比如：回答尽量短，先给结论"
             />
           </label>
+        </div>
+
+        <div className="mt-4 border-t border-border pt-3">
+          <span className="mb-1.5 block text-[11px] font-medium text-muted-foreground">
+            我的配置
+          </span>
+          {settings.profiles.length === 0 ? (
+            <p className="text-[11px] leading-5 text-muted-foreground">
+              还没有保存的配置。把地址、key、模型填好后存一份，聊天框里就能一键切。
+            </p>
+          ) : (
+            <ul className="mb-2 space-y-1">
+              {settings.profiles.map((p: ModelProfile) => (
+                <li
+                  key={p.id}
+                  className="flex items-center justify-between gap-2 rounded-md border border-border px-2 py-1.5"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate text-[12px]">{p.name}</span>
+                    <span className="block truncate text-[10px] text-muted-foreground">
+                      {p.model} · {p.baseUrl}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveProfile(p.id)}
+                    aria-label={`删除配置「${p.name}」`}
+                    className="rounded p-1 text-muted-foreground hover:bg-hover hover:text-destructive"
+                  >
+                    <Trash2 className="size-3.5" aria-hidden="true" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex gap-1.5">
+            <input
+              className={field}
+              value={profileName}
+              onChange={(e) => setProfileName(e.target.value)}
+              placeholder="给当前这套起个名，比如 Kimi 主力"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                onSaveProfile(profileName || draft.model);
+                setProfileName("");
+              }}
+              className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-[12px] text-muted-foreground transition-colors hover:bg-hover hover:text-foreground"
+            >
+              <Plus className="size-3" aria-hidden="true" />
+              存为配置
+            </button>
+          </div>
         </div>
 
         <div className="mt-5 flex justify-end gap-2">

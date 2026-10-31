@@ -31,6 +31,9 @@ export default function Home() {
   const patchMessage = useChatStore((s) => s.patchMessage);
   const setStreaming = useChatStore((s) => s.setStreaming);
   const updateSettings = useChatStore((s) => s.updateSettings);
+  const applyProfile = useChatStore((s) => s.applyProfile);
+  const saveProfile = useChatStore((s) => s.saveProfile);
+  const removeProfile = useChatStore((s) => s.removeProfile);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -176,8 +179,9 @@ export default function Home() {
           onToggleSidebar={() => setSidebarOpen((v) => !v)}
           onOpenPalette={() => setPaletteOpen(true)}
           onOpenSettings={() => setSettingsOpen(true)}
-          onModelChange={(model) => updateSettings({ model })}
-          onBaseChange={(baseUrl) => updateSettings({ baseUrl })}
+          profiles={settings.profiles}
+          onChange={updateSettings}
+          onApplyProfile={applyProfile}
         />
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
@@ -225,8 +229,13 @@ export default function Home() {
         <Composer
           disabled={!hasKey}
           streaming={streaming}
+          settings={settings}
+          profiles={settings.profiles}
           onSend={send}
           onStop={() => abortRef.current?.abort()}
+          onChangeSettings={updateSettings}
+          onApplyProfile={applyProfile}
+          onOpenSettings={() => setSettingsOpen(true)}
         />
       </main>
 
@@ -235,6 +244,8 @@ export default function Home() {
         settings={settings}
         onClose={() => setSettingsOpen(false)}
         onSave={updateSettings}
+        onSaveProfile={saveProfile}
+        onRemoveProfile={removeProfile}
       />
 
       <CommandPalette

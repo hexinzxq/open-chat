@@ -31,6 +31,9 @@ type State = {
   ) => void;
   setStreaming: (value: boolean) => void;
   updateSettings: (patch: Partial<Settings>) => void;
+  saveProfile: (name: string) => void;
+  applyProfile: (id: string) => void;
+  removeProfile: (id: string) => void;
 };
 
 const touch = (c: Conversation): Conversation => ({
@@ -117,6 +120,46 @@ export const useChatStore = create<State>()(
 
       updateSettings: (patch) =>
         set((s) => ({ settings: { ...s.settings, ...patch } })),
+
+      saveProfile: (name) =>
+        set((s) => {
+          const { baseUrl, apiKey, model } = s.settings;
+          const trim = name.trim() || model || "未命名";
+          const existing = s.settings.profiles.find(
+            (p) => p.baseUrl === baseUrl && p.model === model,
+          );
+          const profiles = existing
+            ? s.settings.profiles.map((p) =>
+                p.id === existing.id ? { ...p, name: trim, apiKey } : p,
+              )
+            : [
+                ...s.settings.profiles,
+                { id: uid(), name: trim, baseUrl, apiKey, model },
+              ];
+          return { settings: { ...s.settings, profiles } };
+        }),
+
+      applyProfile: (id) =>
+        set((s) => {
+          const profile = s.settings.profiles.find((p) => p.id === id);
+          if (!profile) return {};
+          return {
+            settings: {
+              ...s.settings,
+              baseUrl: profile.baseUrl,
+              apiKey: profile.apiKey,
+              model: profile.model,
+            },
+          };
+        }),
+
+      removeProfile: (id) =>
+        set((s) => ({
+          settings: {
+            ...s.settings,
+            profiles: s.settings.profiles.filter((p) => p.id !== id),
+          },
+        })),
     }),
     {
       name: "open-chat-v1",

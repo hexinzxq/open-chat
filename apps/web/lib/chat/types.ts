@@ -20,6 +20,15 @@ export type Conversation = {
 
 export type Theme = "dark" | "light" | "system";
 
+/** 一套可以一键切换的端点配置（地址 + key + 模型） */
+export type ModelProfile = {
+  id: string;
+  name: string;
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+};
+
 export type Settings = {
   /** 兼容任何 OpenAI 协议的端点，默认 DeepSeek */
   baseUrl: string;
@@ -29,6 +38,7 @@ export type Settings = {
   theme: Theme;
   /** 0–2，默认 0.7；部分推理模型不接受这个参数，会有提示 */
   temperature: number;
+  profiles: ModelProfile[];
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -38,6 +48,7 @@ export const DEFAULT_SETTINGS: Settings = {
   systemPrompt: "",
   theme: "system",
   temperature: 0.7,
+  profiles: [],
 };
 
 export const SUGGESTIONS = [
