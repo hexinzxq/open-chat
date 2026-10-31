@@ -29,7 +29,7 @@ export function MessageItem({ message, streaming, onRetry }: Props) {
 
       <div className={cn("min-w-0 max-w-[min(100%,680px)]", isUser && "text-right")}>
         {isUser ? (
-          <div className="inline-block rounded-lg bg-elevated px-3 py-2 text-left text-[14px] leading-6 whitespace-pre-wrap break-words">
+          <div className="inline-block rounded-lg border border-accent/25 bg-accent/15 px-3 py-2 text-left text-[14px] leading-6 whitespace-pre-wrap break-words">
             {message.content}
           </div>
         ) : (
