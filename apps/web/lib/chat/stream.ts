@@ -11,6 +11,7 @@ const payloadOf = ({ messages, settings }: StreamArgs) => ({
   apiKey: settings.apiKey,
   model: settings.model,
   systemPrompt: settings.systemPrompt,
+  temperature: settings.temperature,
   messages: messages.map(({ role, content }) => ({ role, content })),
 });
 
@@ -51,6 +52,7 @@ async function openStream(args: StreamArgs): Promise<Response> {
     body: JSON.stringify({
       model: args.settings.model || "deepseek-chat",
       stream: true,
+      temperature: args.settings.temperature,
       messages: [
         ...(system ? [{ role: "system", content: system }] : []),
         ...args.messages.map(({ role, content }) => ({ role, content })),

@@ -22,6 +22,7 @@ type State = {
   selectConversation: (id: string) => void;
   deleteConversation: (id: string) => void;
   renameConversation: (id: string, title: string) => void;
+  togglePinned: (id: string) => void;
   appendMessage: (conversationId: string, message: ChatMessage) => void;
   patchMessage: (
     conversationId: string,
@@ -79,6 +80,13 @@ export const useChatStore = create<State>()(
           ),
         })),
 
+      togglePinned: (id) =>
+        set((s) => ({
+          conversations: s.conversations.map((c) =>
+            c.id === id ? { ...c, pinned: !c.pinned } : c,
+          ),
+        })),
+
       appendMessage: (conversationId, message) =>
         set((s) => ({
           conversations: s.conversations.map((c) => {
@@ -112,6 +120,15 @@ export const useChatStore = create<State>()(
     }),
     {
       name: "open-chat-v1",
+      // 老版本存下来的 settings 没有 theme/temperature，缺的字段用默认值补上
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<State>;
+        return {
+          ...current,
+          ...saved,
+          settings: { ...current.settings, ...(saved.settings ?? {}) },
+        };
+      },
       partialize: (s) => ({
         conversations: s.conversations,
         activeId: s.activeId,

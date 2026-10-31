@@ -5,11 +5,30 @@
 
 /*
   设计计划（改之前先读这一行，别改完再解释）：
-  深色单色界面，只有一个品牌蓝；层次靠 surface→elevated→hover 三级明度，不靠阴影。
-  文字对比度：正文 #E7EAF0 on #0F1117 ≈ 13:1，次要 #8B93A1 ≈ 5.6:1。
+  两套主题共用一套 token 名字，层次靠 surface→elevated→hover 三级明度，不靠阴影。
+  浅色：正文 #171A21 on #FFFFFF ≈ 15:1，次要 #5F6B7A ≈ 5.9:1。
+  深色：正文 #E7EAF0 on #0F1117 ≈ 13:1，次要 #8B93A1 ≈ 5.6:1。
   等宽字体只用于代码，界面文字不用。
 */
 :root {
+  --background: #ffffff;
+  --foreground: #171a21;
+  --surface: #f7f8fa;
+  --elevated: #ffffff;
+  --hover: #eef0f4;
+  --selected: #e6e9f0;
+  --border: #e2e5eb;
+  --input: #e2e5eb;
+  --ring: #3b6fd4;
+  --accent: #3b6fd4;
+  --accent-foreground: #ffffff;
+  --muted: #f1f3f7;
+  --muted-foreground: #5f6b7a;
+  --destructive: #d33b3b;
+  --radius: 0.625rem;
+}
+
+.dark {
   --background: #0f1117;
   --foreground: #e7eaf0;
   --surface: #13161d;
@@ -24,7 +43,6 @@
   --muted: #1a1e26;
   --muted-foreground: #8b93a1;
   --destructive: #f05b5b;
-  --radius: 0.625rem;
 }
 
 @theme inline {

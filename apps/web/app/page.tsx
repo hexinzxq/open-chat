@@ -1,14 +1,24 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { CommandPalette } from "@/components/chat/command-palette";
 import { Composer } from "@/components/chat/composer";
 import { MessageItem } from "@/components/chat/message-item";
-import { Sidebar } from "@/components/chat/sidebar";
 import { SettingsDialog } from "@/components/chat/settings-dialog";
+import { Sidebar } from "@/components/chat/sidebar";
+import { Topbar } from "@/components/chat/topbar";
 import { activeConversation, useChatStore } from "@/lib/chat/store";
 import { streamChat } from "@/lib/chat/stream";
-import { SUGGESTIONS, uid, type ChatMessage } from "@/lib/chat/types";
+import {
+  SUGGESTIONS,
+  uid,
+  type ChatMessage,
+  type Theme,
+} from "@/lib/chat/types";
+
+const nextTheme = (theme: Theme): Theme =>
+  theme === "dark" ? "light" : theme === "light" ? "system" : "dark";
 
 export default function Home() {
   const conversations = useChatStore((s) => s.conversations);
@@ -16,12 +26,16 @@ export default function Home() {
   const settings = useChatStore((s) => s.settings);
   const streaming = useChatStore((s) => s.streaming);
   const createConversation = useChatStore((s) => s.createConversation);
+  const selectConversation = useChatStore((s) => s.selectConversation);
   const appendMessage = useChatStore((s) => s.appendMessage);
   const patchMessage = useChatStore((s) => s.patchMessage);
   const setStreaming = useChatStore((s) => s.setStreaming);
   const updateSettings = useChatStore((s) => s.updateSettings);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -32,52 +46,90 @@ export default function Home() {
     if (!activeId && conversations.length === 0) createConversation();
   }, [activeId, conversations.length, createConversation]);
 
+  // 主题：system 时跟随 prefers-color-scheme
+  useEffect(() => {
+    const root = document.documentElement;
+    const apply = () => {
+      const dark =
+        settings.theme === "dark" ||
+        (settings.theme === "system" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
+      root.classList.toggle("dark", dark);
+    };
+    apply();
+    if (settings.theme !== "system") return;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, [settings.theme]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((v) => !v);
+      } else if (meta && e.key === ",") {
+        e.preventDefault();
+        setSettingsOpen(true);
+      } else if (meta && e.key.toLowerCase() === "b") {
+        e.preventDefault();
+        setSidebarOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [conversation?.messages.length, streaming]);
 
-  const run = async (conversationId: string, history: ChatMessage[]) => {
-    const controller = new AbortController();
-    abortRef.current = controller;
-    setStreaming(true);
+  const run = useCallback(
+    async (conversationId: string, history: ChatMessage[]) => {
+      const controller = new AbortController();
+      abortRef.current = controller;
+      setStreaming(true);
 
-    const reply = assistantMessage();
-    appendMessage(conversationId, reply);
+      const reply = assistantMessage();
+      appendMessage(conversationId, reply);
 
-    try {
-      let acc = "";
-      for await (const delta of streamChat({
-        messages: history,
-        settings,
-        signal: controller.signal,
-      })) {
-        acc += delta;
-        patchMessage(conversationId, reply.id, { content: acc });
+      try {
+        let acc = "";
+        for await (const delta of streamChat({
+          messages: history,
+          settings,
+          signal: controller.signal,
+        })) {
+          acc += delta;
+          patchMessage(conversationId, reply.id, { content: acc });
+        }
+        if (!acc)
+          patchMessage(conversationId, reply.id, {
+            error: "上游没有返回任何内容",
+          });
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          const current = useChatStore
+            .getState()
+            .conversations.find((c) => c.id === conversationId)
+            ?.messages.find((m) => m.id === reply.id);
+          if (!current?.content)
+            patchMessage(conversationId, reply.id, { error: "已停止" });
+        } else {
+          patchMessage(conversationId, reply.id, {
+            error: err instanceof Error ? err.message : "请求失败",
+          });
+        }
+      } finally {
+        abortRef.current = null;
+        setStreaming(false);
       }
-      if (!acc)
-        patchMessage(conversationId, reply.id, {
-          error: "上游没有返回任何内容",
-        });
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") {
-        const current = useChatStore
-          .getState()
-          .conversations.find((c) => c.id === conversationId)
-          ?.messages.find((m) => m.id === reply.id);
-        if (!current?.content)
-          patchMessage(conversationId, reply.id, { error: "已停止" });
-      } else {
-        patchMessage(conversationId, reply.id, {
-          error: err instanceof Error ? err.message : "请求失败",
-        });
-      }
-    } finally {
-      abortRef.current = null;
-      setStreaming(false);
-    }
-  };
+    },
+    [appendMessage, patchMessage, setStreaming, settings],
+  );
 
   const send = (text: string) => {
     if (!hasKey) {
@@ -107,18 +159,26 @@ export default function Home() {
   const showEmpty = messages.length === 0;
 
   return (
-    <div className="flex h-dvh overflow-hidden">
-      <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
+    <div className="flex h-dvh overflow-hidden bg-background text-foreground">
+      <Sidebar
+        open={sidebarOpen}
+        onOpenSettings={() => setSettingsOpen(true)}
+        onNewConversation={() => {
+          createConversation();
+        }}
+      />
 
       <main className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
-          <h1 className="truncate text-[13px] font-medium text-foreground">
-            {conversation?.title ?? "新对话"}
-          </h1>
-          <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
-            {settings.model}
-          </span>
-        </header>
+        <Topbar
+          conversation={conversation}
+          settings={settings}
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen((v) => !v)}
+          onOpenPalette={() => setPaletteOpen(true)}
+          onOpenSettings={() => setSettingsOpen(true)}
+          onModelChange={(model) => updateSettings({ model })}
+          onBaseChange={(baseUrl) => updateSettings({ baseUrl })}
+        />
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           <div className="mx-auto max-w-3xl px-4 py-6">
@@ -175,6 +235,20 @@ export default function Home() {
         settings={settings}
         onClose={() => setSettingsOpen(false)}
         onSave={updateSettings}
+      />
+
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        conversations={conversations}
+        activeId={activeId}
+        theme={settings.theme}
+        onNew={() => createConversation()}
+        onSelect={selectConversation}
+        onOpenSettings={() => setSettingsOpen(true)}
+        onCycleTheme={() =>
+          updateSettings({ theme: nextTheme(settings.theme) })
+        }
       />
     </div>
   );

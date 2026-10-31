@@ -8,6 +8,7 @@ type Body = {
   apiKey?: string;
   model?: string;
   systemPrompt?: string;
+  temperature?: number;
   messages?: { role: string; content: string }[];
 };
 

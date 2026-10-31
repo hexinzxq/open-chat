@@ -15,7 +15,10 @@ export type Conversation = {
   messages: ChatMessage[];
   createdAt: number;
   updatedAt: number;
+  pinned?: boolean;
 };
+
+export type Theme = "dark" | "light" | "system";
 
 export type Settings = {
   /** 兼容任何 OpenAI 协议的端点，默认 DeepSeek */
@@ -23,6 +26,9 @@ export type Settings = {
   apiKey: string;
   model: string;
   systemPrompt: string;
+  theme: Theme;
+  /** 0–2，默认 0.7；部分推理模型不接受这个参数，会有提示 */
+  temperature: number;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -30,6 +36,8 @@ export const DEFAULT_SETTINGS: Settings = {
   apiKey: "",
   model: "deepseek-chat",
   systemPrompt: "",
+  theme: "system",
+  temperature: 0.7,
 };
 
 export const SUGGESTIONS = [
