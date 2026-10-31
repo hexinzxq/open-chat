@@ -43,12 +43,20 @@ export function Composer({ disabled, streaming, onSend, onStop }: Props) {
             rows={1}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+              if (
+                e.key === "Enter" &&
+                !e.shiftKey &&
+                !e.nativeEvent.isComposing
+              ) {
                 e.preventDefault();
                 submit();
               }
             }}
-            placeholder={disabled ? "先去设置里填 API Key" : "说点什么，Enter 发送，Shift+Enter 换行"}
+            placeholder={
+              disabled
+                ? "先去设置里填 API Key"
+                : "说点什么，Enter 发送，Shift+Enter 换行"
+            }
             disabled={disabled}
             aria-label="输入消息"
             className="max-h-[200px] flex-1 resize-none bg-transparent px-2 py-1.5 text-[14px] leading-6 outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
@@ -70,7 +78,11 @@ export function Composer({ disabled, streaming, onSend, onStop }: Props) {
               className="flex size-8 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="发送"
             >
-              {disabled ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <ArrowUp className="size-4" aria-hidden="true" />}
+              {disabled ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <ArrowUp className="size-4" aria-hidden="true" />
+              )}
             </button>
           )}
         </div>

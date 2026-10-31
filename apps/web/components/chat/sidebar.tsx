@@ -29,8 +29,12 @@ export function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
           <span className="text-[13px] font-semibold">OC</span>
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold leading-tight">Open Chat</p>
-          <p className="truncate text-[11px] text-muted-foreground">streaming · local-first</p>
+          <p className="truncate text-sm font-semibold leading-tight">
+            Open Chat
+          </p>
+          <p className="truncate text-[11px] text-muted-foreground">
+            streaming · local-first
+          </p>
         </div>
       </div>
 
@@ -45,7 +49,10 @@ export function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
         </button>
       </div>
 
-      <nav aria-label="会话列表" className="mt-3 flex-1 overflow-y-auto px-2 pb-2">
+      <nav
+        aria-label="会话列表"
+        className="mt-3 flex-1 overflow-y-auto px-2 pb-2"
+      >
         {conversations.length === 0 ? (
           <p className="px-2 py-6 text-center text-xs leading-5 text-muted-foreground">
             还没有对话
@@ -62,13 +69,22 @@ export function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
                   aria-current={activeId === c.id ? "true" : undefined}
                   className={cn(
                     "flex w-full items-start gap-2 rounded-md px-2.5 py-2 pr-8 text-left transition-colors",
-                    activeId === c.id ? "bg-selected text-foreground" : "text-muted-foreground hover:bg-hover hover:text-foreground"
+                    activeId === c.id
+                      ? "bg-selected text-foreground"
+                      : "text-muted-foreground hover:bg-hover hover:text-foreground",
                   )}
                 >
-                  <MessageSquare className="mt-0.5 size-3.5 shrink-0 opacity-70" aria-hidden="true" />
+                  <MessageSquare
+                    className="mt-0.5 size-3.5 shrink-0 opacity-70"
+                    aria-hidden="true"
+                  />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] leading-5">{c.title}</span>
-                    <span className="block text-[11px] text-muted-foreground">{timeLabel(c.updatedAt)}</span>
+                    <span className="block truncate text-[13px] leading-5">
+                      {c.title}
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      {timeLabel(c.updatedAt)}
+                    </span>
                   </span>
                 </button>
                 <button

@@ -33,16 +33,24 @@ export function SettingsDialog({ open, settings, onClose, onSave }: Props) {
 function SettingsForm({ settings, onClose, onSave }: Omit<Props, "open">) {
   const [draft, setDraft] = useState(settings);
 
-  const field = "w-full rounded-md border border-border bg-background px-2.5 py-2 text-[13px] outline-none focus:border-ring";
+  const field =
+    "w-full rounded-md border border-border bg-background px-2.5 py-2 text-[13px] outline-none focus:border-ring";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-label="设置">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="设置"
+    >
       <div className="w-full max-w-md rounded-xl border border-border bg-surface p-5 shadow-xl">
         <div className="mb-4 flex items-start justify-between">
           <div>
             <h2 className="text-sm font-semibold">连接设置</h2>
             <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
-              key 只存在你这个浏览器里，请求经本站代理转发。线上公共部署建议用限额 key。
+              key
+              只存在你这个浏览器里，请求经本站代理转发。线上公共部署建议用限额
+              key。
             </p>
           </div>
           <button
@@ -57,7 +65,9 @@ function SettingsForm({ settings, onClose, onSave }: Omit<Props, "open">) {
 
         <div className="space-y-3">
           <label className="block">
-            <span className="mb-1 block text-[11px] font-medium text-muted-foreground">Base URL</span>
+            <span className="mb-1 block text-[11px] font-medium text-muted-foreground">
+              Base URL
+            </span>
             <input
               className={field}
               value={draft.baseUrl}
@@ -68,7 +78,9 @@ function SettingsForm({ settings, onClose, onSave }: Omit<Props, "open">) {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-[11px] font-medium text-muted-foreground">API Key</span>
+            <span className="mb-1 block text-[11px] font-medium text-muted-foreground">
+              API Key
+            </span>
             <input
               className={field}
               type="password"
@@ -81,7 +93,9 @@ function SettingsForm({ settings, onClose, onSave }: Omit<Props, "open">) {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-[11px] font-medium text-muted-foreground">模型</span>
+            <span className="mb-1 block text-[11px] font-medium text-muted-foreground">
+              模型
+            </span>
             <input
               className={field}
               value={draft.model}
@@ -97,11 +111,15 @@ function SettingsForm({ settings, onClose, onSave }: Omit<Props, "open">) {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-[11px] font-medium text-muted-foreground">系统提示（可空）</span>
+            <span className="mb-1 block text-[11px] font-medium text-muted-foreground">
+              系统提示（可空）
+            </span>
             <textarea
               className={`${field} min-h-[72px] resize-y`}
               value={draft.systemPrompt}
-              onChange={(e) => setDraft({ ...draft, systemPrompt: e.target.value })}
+              onChange={(e) =>
+                setDraft({ ...draft, systemPrompt: e.target.value })
+              }
               placeholder="比如：回答尽量短，先给结论"
             />
           </label>

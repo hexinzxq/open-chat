@@ -16,18 +16,30 @@ export function MessageItem({ message, streaming, onRetry }: Props) {
   const isUser = message.role === "user";
 
   return (
-    <article className={cn("group flex gap-3 px-1", isUser ? "flex-row-reverse" : "flex-row")}>
+    <article
+      className={cn(
+        "group flex gap-3 px-1",
+        isUser ? "flex-row-reverse" : "flex-row",
+      )}
+    >
       <div
         className={cn(
           "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border border-border",
-          isUser ? "bg-elevated text-muted-foreground" : "bg-accent text-accent-foreground"
+          isUser
+            ? "bg-elevated text-muted-foreground"
+            : "bg-accent text-accent-foreground",
         )}
         aria-hidden="true"
       >
         {isUser ? <User className="size-3.5" /> : <Bot className="size-3.5" />}
       </div>
 
-      <div className={cn("min-w-0 max-w-[min(100%,680px)]", isUser && "text-right")}>
+      <div
+        className={cn(
+          "min-w-0 max-w-[min(100%,680px)]",
+          isUser && "text-right",
+        )}
+      >
         {isUser ? (
           <div className="inline-block rounded-lg border border-accent/25 bg-accent/15 px-3 py-2 text-left text-[14px] leading-6 whitespace-pre-wrap break-words">
             {message.content}
@@ -48,7 +60,10 @@ export function MessageItem({ message, streaming, onRetry }: Props) {
 
         {message.error ? (
           <div className="mt-2 inline-flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-2.5 py-2 text-left text-[12px] leading-5 text-destructive">
-            <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            <AlertTriangle
+              className="mt-0.5 size-3.5 shrink-0"
+              aria-hidden="true"
+            />
             <span className="break-words">{message.error}</span>
             {onRetry ? (
               <button

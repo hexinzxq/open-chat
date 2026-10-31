@@ -48,20 +48,30 @@ export default function Home() {
 
     try {
       let acc = "";
-      for await (const delta of streamChat({ messages: history, settings, signal: controller.signal })) {
+      for await (const delta of streamChat({
+        messages: history,
+        settings,
+        signal: controller.signal,
+      })) {
         acc += delta;
         patchMessage(conversationId, reply.id, { content: acc });
       }
-      if (!acc) patchMessage(conversationId, reply.id, { error: "上游没有返回任何内容" });
+      if (!acc)
+        patchMessage(conversationId, reply.id, {
+          error: "上游没有返回任何内容",
+        });
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         const current = useChatStore
           .getState()
           .conversations.find((c) => c.id === conversationId)
           ?.messages.find((m) => m.id === reply.id);
-        if (!current?.content) patchMessage(conversationId, reply.id, { error: "已停止" });
+        if (!current?.content)
+          patchMessage(conversationId, reply.id, { error: "已停止" });
       } else {
-        patchMessage(conversationId, reply.id, { error: err instanceof Error ? err.message : "请求失败" });
+        patchMessage(conversationId, reply.id, {
+          error: err instanceof Error ? err.message : "请求失败",
+        });
       }
     } finally {
       abortRef.current = null;
@@ -77,7 +87,9 @@ export default function Home() {
     const id = activeId ?? createConversation();
     const user = userMessage(text);
     appendMessage(id, user);
-    const history = useChatStore.getState().conversations.find((c) => c.id === id)?.messages ?? [user];
+    const history = useChatStore
+      .getState()
+      .conversations.find((c) => c.id === id)?.messages ?? [user];
     void run(id, history);
   };
 
@@ -100,7 +112,9 @@ export default function Home() {
 
       <main className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
-          <h1 className="truncate text-[13px] font-medium text-foreground">{conversation?.title ?? "新对话"}</h1>
+          <h1 className="truncate text-[13px] font-medium text-foreground">
+            {conversation?.title ?? "新对话"}
+          </h1>
           <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
             {settings.model}
           </span>
@@ -110,7 +124,9 @@ export default function Home() {
           <div className="mx-auto max-w-3xl px-4 py-6">
             {showEmpty ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <h2 className="text-2xl font-semibold tracking-tight">问点什么吧</h2>
+                <h2 className="text-2xl font-semibold tracking-tight">
+                  问点什么吧
+                </h2>
                 <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
                   前端直连任何 OpenAI 兼容接口。会话留在本机浏览器，不上传。
                 </p>
@@ -133,7 +149,11 @@ export default function Home() {
                   <MessageItem
                     key={m.id}
                     message={m}
-                    streaming={streaming && i === messages.length - 1 && m.role === "assistant"}
+                    streaming={
+                      streaming &&
+                      i === messages.length - 1 &&
+                      m.role === "assistant"
+                    }
                     onRetry={m.error ? () => retry(m.id) : undefined}
                   />
                 ))}
@@ -142,7 +162,12 @@ export default function Home() {
           </div>
         </div>
 
-        <Composer disabled={!hasKey} streaming={streaming} onSend={send} onStop={() => abortRef.current?.abort()} />
+        <Composer
+          disabled={!hasKey}
+          streaming={streaming}
+          onSend={send}
+          onStop={() => abortRef.current?.abort()}
+        />
       </main>
 
       <SettingsDialog

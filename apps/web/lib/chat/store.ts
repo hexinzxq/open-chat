@@ -23,12 +23,19 @@ type State = {
   deleteConversation: (id: string) => void;
   renameConversation: (id: string, title: string) => void;
   appendMessage: (conversationId: string, message: ChatMessage) => void;
-  patchMessage: (conversationId: string, messageId: string, patch: Partial<ChatMessage>) => void;
+  patchMessage: (
+    conversationId: string,
+    messageId: string,
+    patch: Partial<ChatMessage>,
+  ) => void;
   setStreaming: (value: boolean) => void;
   updateSettings: (patch: Partial<Settings>) => void;
 };
 
-const touch = (c: Conversation): Conversation => ({ ...c, updatedAt: Date.now() });
+const touch = (c: Conversation): Conversation => ({
+  ...c,
+  updatedAt: Date.now(),
+});
 
 export const useChatStore = create<State>()(
   persist(
@@ -47,7 +54,10 @@ export const useChatStore = create<State>()(
           createdAt: now,
           updatedAt: now,
         };
-        set((s) => ({ conversations: [conversation, ...s.conversations], activeId: conversation.id }));
+        set((s) => ({
+          conversations: [conversation, ...s.conversations],
+          activeId: conversation.id,
+        }));
         return conversation.id;
       },
 
@@ -64,7 +74,9 @@ export const useChatStore = create<State>()(
 
       renameConversation: (id, title) =>
         set((s) => ({
-          conversations: s.conversations.map((c) => (c.id === id ? { ...c, title } : c)),
+          conversations: s.conversations.map((c) =>
+            c.id === id ? { ...c, title } : c,
+          ),
         })),
 
       appendMessage: (conversationId, message) =>
@@ -85,21 +97,28 @@ export const useChatStore = create<State>()(
             c.id === conversationId
               ? touch({
                   ...c,
-                  messages: c.messages.map((m) => (m.id === messageId ? { ...m, ...patch } : m)),
+                  messages: c.messages.map((m) =>
+                    m.id === messageId ? { ...m, ...patch } : m,
+                  ),
                 })
-              : c
+              : c,
           ),
         })),
 
       setStreaming: (value) => set({ streaming: value }),
 
-      updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
+      updateSettings: (patch) =>
+        set((s) => ({ settings: { ...s.settings, ...patch } })),
     }),
     {
       name: "open-chat-v1",
-      partialize: (s) => ({ conversations: s.conversations, activeId: s.activeId, settings: s.settings }),
-    }
-  )
+      partialize: (s) => ({
+        conversations: s.conversations,
+        activeId: s.activeId,
+        settings: s.settings,
+      }),
+    },
+  ),
 );
 
 export const activeConversation = (s: State) =>

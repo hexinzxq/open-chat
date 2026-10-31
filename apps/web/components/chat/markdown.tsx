@@ -28,10 +28,22 @@ export function Markdown({ content, className }: Props) {
               {children}
             </pre>
           ),
-          code: ({ className: cls, children, ...props }: ComponentPropsWithoutRef<"code">) => {
-            const isBlock = Boolean(cls?.includes("language-")) || String(children).includes("\n");
+          code: ({
+            className: cls,
+            children,
+            ...props
+          }: ComponentPropsWithoutRef<"code">) => {
+            const isBlock =
+              Boolean(cls?.includes("language-")) ||
+              String(children).includes("\n");
             return (
-              <code className={cn(isBlock ? "chat-code-block" : "chat-code-inline", cls)} {...props}>
+              <code
+                className={cn(
+                  isBlock ? "chat-code-block" : "chat-code-inline",
+                  cls,
+                )}
+                {...props}
+              >
                 {children}
               </code>
             );

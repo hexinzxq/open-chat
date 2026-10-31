@@ -36,7 +36,10 @@ async function openStream(args: StreamArgs): Promise<Response> {
     // 网络层就挂了，继续试直连
   }
 
-  const base = (args.settings.baseUrl || "https://api.deepseek.com").replace(/\/+$/, "");
+  const base = (args.settings.baseUrl || "https://api.deepseek.com").replace(
+    /\/+$/,
+    "",
+  );
   const system = args.settings.systemPrompt?.trim();
   return fetch(`${base}/chat/completions`, {
     method: "POST",
@@ -99,7 +102,9 @@ export async function* streamChat(args: StreamArgs): AsyncGenerator<string> {
   if (!res.ok || !res.body) {
     let detail = `${res.status} ${res.statusText}`;
     try {
-      const data = (await res.json()) as { error?: string | { message?: string } };
+      const data = (await res.json()) as {
+        error?: string | { message?: string };
+      };
       const raw = data?.error;
       const message = typeof raw === "string" ? raw : raw?.message;
       if (message) detail = message;

@@ -29,8 +29,11 @@ export async function POST(req: Request) {
   const apiKey = body.apiKey?.trim() || process.env.DEEPSEEK_API_KEY || "";
   if (!apiKey) {
     return NextResponse.json(
-      { error: "还没填 API Key——点左下角设置，或者给部署环境配 DEEPSEEK_API_KEY" },
-      { status: 401 }
+      {
+        error:
+          "还没填 API Key——点左下角设置，或者给部署环境配 DEEPSEEK_API_KEY",
+      },
+      { status: 401 },
     );
   }
   if (!body.messages?.length) {
@@ -38,7 +41,12 @@ export async function POST(req: Request) {
   }
 
   const base = (body.baseUrl?.trim() || DEFAULT_BASE).replace(/\/+$/, "");
-  const messages = [...(body.systemPrompt?.trim() ? [{ role: "system", content: body.systemPrompt }] : []), ...body.messages];
+  const messages = [
+    ...(body.systemPrompt?.trim()
+      ? [{ role: "system", content: body.systemPrompt }]
+      : []),
+    ...body.messages,
+  ];
 
   let upstream: Response;
   try {
@@ -56,22 +64,31 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     return NextResponse.json(
-      { error: `连不上 ${base}：${err instanceof Error ? err.message : "未知网络错误"}` },
-      { status: 502 }
+      {
+        error: `连不上 ${base}：${err instanceof Error ? err.message : "未知网络错误"}`,
+      },
+      { status: 502 },
     );
   }
 
   if (!upstream.ok || !upstream.body) {
     const text = await upstream.text().catch(() => "");
-    let message = text.slice(0, 400) || `${upstream.status} ${upstream.statusText}`;
+    let message =
+      text.slice(0, 400) || `${upstream.status} ${upstream.statusText}`;
     try {
-      const parsed = JSON.parse(text) as { error?: { message?: string } | string };
-      const detail = typeof parsed.error === "string" ? parsed.error : parsed.error?.message;
+      const parsed = JSON.parse(text) as {
+        error?: { message?: string } | string;
+      };
+      const detail =
+        typeof parsed.error === "string" ? parsed.error : parsed.error?.message;
       if (detail) message = detail;
     } catch {
       /* 保持原始文本 */
     }
-    return NextResponse.json({ error: message }, { status: upstream.status || 502 });
+    return NextResponse.json(
+      { error: message },
+      { status: upstream.status || 502 },
+    );
   }
 
   return new Response(upstream.body, {

@@ -30,11 +30,11 @@ Windows 上用 PowerShell 或 Git Bash 跑同样的命令；没有 pnpm 就先 `
 
 ## 两种构建
 
-| 模式 | 命令 | 说明 |
-|---|---|---|
-| 本地开发 | `pnpm dev` | Next dev server，带 `/api/chat` 代理 |
-| 静态导出 | `pnpm build:static` | 产物在 `apps/web/out/`，无服务端，前端直连上游 |
-| 生产（Node） | `pnpm build && pnpm --filter @open-chat/web start` | standalone 服务端渲染 |
+| 模式         | 命令                                               | 说明                                           |
+| ------------ | -------------------------------------------------- | ---------------------------------------------- |
+| 本地开发     | `pnpm dev`                                         | Next dev server，带 `/api/chat` 代理           |
+| 静态导出     | `pnpm build:static`                                | 产物在 `apps/web/out/`，无服务端，前端直连上游 |
+| 生产（Node） | `pnpm build && pnpm --filter @open-chat/web start` | standalone 服务端渲染                          |
 
 静态版没有 `/api/chat`，前端会检测到 404 然后改成浏览器直连；DeepSeek 的接口是允许跨域的，
 换成别家接口时如果被 CORS 挡了，就用带服务端的部署方式。
